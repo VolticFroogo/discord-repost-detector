@@ -31,9 +31,18 @@ func (image Image) Insert() (err error) {
 func (image Image) FindMatch() (matches []Image, err error) {
 	ctx := db.DefaultContext()
 
-	cursor, err := db.Images.Find(ctx, bson.M{
-		"hash":  image.Hash,
-		"guild": image.Guild,
+	cursor, err := db.Images.Aggregate(ctx, []bson.M{
+		{
+			"$match": bson.M{
+				"hash":  image.Hash,
+				"guild": image.Guild,
+			},
+		},
+		{
+			"$sort": bson.M{
+				"datetime": 1,
+			},
+		},
 	})
 	if err != nil {
 		return
