@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/VolticFroogo/discord-repost-detector/command"
 	"github.com/VolticFroogo/discord-repost-detector/db"
 	"github.com/VolticFroogo/discord-repost-detector/discord"
 	"github.com/VolticFroogo/discord-repost-detector/status"
@@ -25,6 +26,9 @@ func main() {
 
 	// Start the status updater.
 	statusQuitChan, statusFinished := status.Start()
+
+	// Register our commands.
+	command.RegisterCommands()
 
 	// Wait until we receive an interrupt signal.
 	sc := make(chan os.Signal, 1)

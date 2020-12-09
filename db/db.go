@@ -12,13 +12,15 @@ import (
 )
 
 var (
+	uri  = os.Getenv("DB_URI")
+	name = os.Getenv("DB_NAME")
+
 	client *mongo.Client
 
 	Images *mongo.Collection
 )
 
 func Init() (err error) {
-	uri := os.Getenv("DB_URI")
 	opts := options.Client().ApplyURI(uri)
 
 	client, err = mongo.NewClient(opts)
@@ -37,8 +39,7 @@ func Init() (err error) {
 		return fmt.Errorf("pinging server: %s", err)
 	}
 
-	dbName := os.Getenv("DB_NAME")
-	db := client.Database(dbName)
+	db := client.Database(name)
 
 	Images = db.Collection("images")
 

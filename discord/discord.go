@@ -2,9 +2,9 @@ package discord
 
 import (
 	"fmt"
+	"github.com/VolticFroogo/discord-repost-detector/model"
 	"github.com/bwmarrin/discordgo"
 	"log"
-	"os"
 )
 
 var (
@@ -12,8 +12,7 @@ var (
 )
 
 func Init() (err error) {
-	token := os.Getenv("DISCORD_TOKEN")
-	Discord, err = discordgo.New("Bot " + token)
+	Discord, err = discordgo.New("Bot " + model.DiscordToken)
 	if err != nil {
 		return fmt.Errorf("creating Discord client: %s", err)
 	}
