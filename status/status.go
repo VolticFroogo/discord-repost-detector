@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/VolticFroogo/discord-repost-detector/db"
 	"github.com/VolticFroogo/discord-repost-detector/discord"
-	"github.com/VolticFroogo/discord-repost-detector/model"
 	"log"
 	"time"
 )
@@ -44,7 +43,7 @@ func updateStatus() {
 		return
 	}
 
-	err = discord.Discord.UpdateStatus(0, fmt.Sprintf("%shelp - seen %d images", model.Prefix, count))
+	err = discord.Discord.UpdateStatus(0, fmt.Sprintf("@me - seen %d images", count))
 	if err != nil {
 		log.Printf("Error updating status: %s", err)
 	}
