@@ -54,6 +54,7 @@ func Close() (err error) {
 		return fmt.Errorf("disconnecting: %s", err)
 	}
 
+	log.Println("Disconnected from database.")
 	return
 }
 

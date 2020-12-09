@@ -8,21 +8,21 @@ import (
 )
 
 var (
-	discord *discordgo.Session
+	Discord *discordgo.Session
 )
 
 func Init() (err error) {
 	token := os.Getenv("DISCORD_TOKEN")
-	discord, err = discordgo.New("Bot " + token)
+	Discord, err = discordgo.New("Bot " + token)
 	if err != nil {
-		return fmt.Errorf("creating discord client: %s", err)
+		return fmt.Errorf("creating Discord client: %s", err)
 	}
 
-	discord.AddHandler(messageCreate)
+	Discord.AddHandler(messageCreate)
 
-	discord.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
+	Discord.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
 
-	err = discord.Open()
+	err = Discord.Open()
 	if err != nil {
 		return fmt.Errorf("connecting to Discord: %s", err)
 	}
@@ -33,10 +33,11 @@ func Init() (err error) {
 }
 
 func Close() (err error) {
-	err = discord.Close()
+	err = Discord.Close()
 	if err != nil {
 		return fmt.Errorf("disconnecting: %s", err)
 	}
 
+	log.Println("Disconnected from Discord.")
 	return
 }

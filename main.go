@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/VolticFroogo/discord-repost-detector/db"
 	"github.com/VolticFroogo/discord-repost-detector/discord"
+	"github.com/VolticFroogo/discord-repost-detector/status"
 	"log"
 	"os"
 	"os/signal"
@@ -22,10 +23,17 @@ func main() {
 		log.Fatalf("Error initialising Discord: %s", err)
 	}
 
+	// Start the status updater.
+	statusQuitChan, statusFinished := status.Start()
+
 	// Wait until we receive an interrupt signal.
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
+
+	// Quit out of the status updater.
+	statusQuitChan <- true
+	<-statusFinished
 
 	// Disconnect from Discord.
 	err = discord.Close()
