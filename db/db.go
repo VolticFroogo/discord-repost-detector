@@ -17,7 +17,8 @@ var (
 
 	client *mongo.Client
 
-	Images *mongo.Collection
+	Images   *mongo.Collection
+	Channels *mongo.Collection
 )
 
 func Init() (err error) {
@@ -42,6 +43,7 @@ func Init() (err error) {
 	db := client.Database(name)
 
 	Images = db.Collection("images")
+	Channels = db.Collection("channels")
 
 	log.Println("Connected to database.")
 
