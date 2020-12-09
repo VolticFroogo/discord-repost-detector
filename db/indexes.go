@@ -42,7 +42,7 @@ func setupIndexes() (err error) {
 			return err
 		}
 
-		log.Printf("Created index %s", indexName)
+		log.Printf("Created index %s in collection %s", indexName, (*indexes[i].Collection).Name())
 	}
 
 	log.Println("Setup/verified database indexes.")
