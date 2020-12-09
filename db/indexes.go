@@ -18,9 +18,9 @@ func setupIndexes() (err error) {
 	})
 	if err != nil {
 		return
-	} else {
-		log.Printf("Created index %s", indexName)
 	}
+
+	log.Printf("Created index %s", indexName)
 
 	log.Println("Setup/verified database indexes.")
 
