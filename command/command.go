@@ -8,11 +8,18 @@ import (
 type Command struct {
 	Name        string
 	Description string
+	Format      string
+	Example     string
 	Triggers    []string
 	Exec        func(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error)
 }
 
 var (
+	commands   []Command
+	triggerMap map[string]*Command
+)
+
+func RegisterCommands() {
 	commands = []Command{
 		{
 			Name:        "Help",
@@ -20,14 +27,23 @@ var (
 			Triggers: []string{
 				"help",
 			},
-			Exec: help,
+			Format:  "",
+			Example: "",
+			Exec:    help,
+		},
+		{
+			Name:        "Commands",
+			Description: "List all available commands.",
+			Triggers: []string{
+				"commands",
+				"list",
+			},
+			Format:  "",
+			Example: "",
+			Exec:    list,
 		},
 	}
 
-	triggerMap map[string]*Command
-)
-
-func RegisterCommands() {
 	triggerMap = make(map[string]*Command)
 
 	for i := range commands {

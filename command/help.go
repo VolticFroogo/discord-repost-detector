@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func help(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Help"
 	embed.Description = "Repost Detector is a Discord bot which automatically detects and flags images which have been posted in the server before."
@@ -25,10 +25,34 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err 
 	return
 }
 
-func unknownCommand(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func unknownCommand(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Unknown Command"
 	embed.Description = fmt.Sprintf("I didn't recognise that command; try %s help", model.Ping)
+
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	return
+}
+
+func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
+	embed := model.DefaultEmbed(m.Author)
+	embed.Title = "Commands"
+	embed.Description = "A list of all available commands."
+
+	for i := range commands {
+		triggers := ""
+		for j := 0; j < len(commands[i].Triggers)-1; j++ {
+			triggers += commands[i].Triggers[j] + ", "
+		}
+		triggers += commands[i].Triggers[len(commands[i].Triggers)-1]
+
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name: fmt.Sprintf("%s (%s)", commands[i].Name, triggers),
+			Value: fmt.Sprintf("%s\n\nFormat: %s %s %s\nExample: %s %s %s", commands[i].Description,
+				model.Ping, commands[i].Triggers[0], commands[i].Format,
+				model.Ping, commands[i].Triggers[0], commands[i].Example),
+		})
+	}
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return
