@@ -44,6 +44,7 @@ func Init() (err error) {
 
 	log.Println("Connected to database.")
 
+	err = setupIndexes()
 	return
 }
 
