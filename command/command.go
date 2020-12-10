@@ -1,17 +1,34 @@
 package command
 
 import (
+	"fmt"
+	"github.com/VolticFroogo/discord-repost-detector/model"
 	"github.com/bwmarrin/discordgo"
 	"strings"
 )
 
 type Command struct {
-	Name        string
-	Description string
-	Format      string
-	Example     string
-	Triggers    []string
-	Exec        func(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error)
+	Name          string
+	Description   string
+	Format        string
+	Example       string
+	Triggers      []string
+	Exec          func(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error)
+	RequiresAdmin bool
+}
+
+func (command *Command) NameWithAdmin() string {
+	if command.RequiresAdmin {
+		return command.Name + " (admin)"
+	}
+
+	return command.Name
+}
+
+func (command *Command) FormattedDescription() string {
+	return fmt.Sprintf("%s\n\nFormat: %s %s %s\nExample: %s %s %s", command.Description,
+		model.Ping, command.Triggers[0], command.Format,
+		model.Ping, command.Triggers[0], command.Example)
 }
 
 var (
@@ -27,9 +44,10 @@ func RegisterCommands() {
 			Triggers: []string{
 				"help",
 			},
-			Format:  "",
-			Example: "",
-			Exec:    help,
+			Format:        "",
+			Example:       "",
+			Exec:          help,
+			RequiresAdmin: false,
 		},
 		{
 			Name:        "Commands",
@@ -38,9 +56,23 @@ func RegisterCommands() {
 				"commands",
 				"list",
 			},
-			Format:  "",
-			Example: "",
-			Exec:    list,
+			Format:        "",
+			Example:       "",
+			Exec:          list,
+			RequiresAdmin: false,
+		},
+		{
+			Name:        "Channel",
+			Description: "Add or remove channels for the bot to detect reposts in.",
+			Triggers: []string{
+				"channel",
+				"chan",
+				"chat",
+			},
+			Format:        "[add/remove]",
+			Example:       "add",
+			Exec:          channel,
+			RequiresAdmin: true,
 		},
 	}
 
@@ -54,17 +86,24 @@ func RegisterCommands() {
 }
 
 func Handle(s *discordgo.Session, m *discordgo.MessageCreate) (err error) {
-	split := strings.Split(strings.ToLower(m.Content), " ")
+	args := strings.Split(strings.ToLower(m.Content), " ")
 
-	if len(split) == 1 {
-		err = help(s, m, split)
+	if len(args) == 1 {
+		err = help(s, m, args)
 		return
 	}
 
-	if command, ok := triggerMap[split[1]]; ok {
-		err = command.Exec(s, m, split)
+	if command, ok := triggerMap[args[1]]; ok {
+		if command.RequiresAdmin {
+			admin, err := hasAdministrator(s, m, args)
+			if err != nil || !admin {
+				return err
+			}
+		}
+
+		err = command.Exec(s, m, args)
 	} else {
-		err = unknownCommand(s, m, split)
+		err = unknownCommand(s, m, args)
 	}
 
 	return

@@ -11,10 +11,8 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err 
 
 	if len(args) > 2 {
 		if command, ok := triggerMap[args[2]]; ok {
-			embed.Title = fmt.Sprintf("Help for the %s command", command.Name)
-			embed.Description = fmt.Sprintf("%s\n\nFormat: %s %s %s\nExample: %s %s %s", command.Description,
-				model.Ping, command.Triggers[0], command.Format,
-				model.Ping, command.Triggers[0], command.Example)
+			embed.Title = fmt.Sprintf("Help for the %s command", command.NameWithAdmin())
+			embed.Description = command.FormattedDescription()
 
 			_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 			return
@@ -60,10 +58,8 @@ func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err err
 		triggers += commands[i].Triggers[len(commands[i].Triggers)-1]
 
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name: fmt.Sprintf("%s (%s)", commands[i].Name, triggers),
-			Value: fmt.Sprintf("%s\n\nFormat: %s %s %s\nExample: %s %s %s", commands[i].Description,
-				model.Ping, commands[i].Triggers[0], commands[i].Format,
-				model.Ping, commands[i].Triggers[0], commands[i].Example),
+			Name:  fmt.Sprintf("%s [%s]", commands[i].NameWithAdmin(), triggers),
+			Value: commands[i].FormattedDescription(),
 		})
 	}
 
