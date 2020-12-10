@@ -22,15 +22,6 @@ var indexes = []index{
 			},
 		},
 	},
-	{
-		Collection: &Channels,
-		Model: mongo.IndexModel{
-			Keys: bson.D{
-				{"guild", 1},
-				{"channel", 1},
-			},
-		},
-	},
 }
 
 func setupIndexes() (err error) {
