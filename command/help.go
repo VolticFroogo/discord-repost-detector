@@ -6,8 +6,21 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func help(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
+func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
 	embed := model.DefaultEmbed(m.Author)
+
+	if len(args) > 2 {
+		if command, ok := triggerMap[args[2]]; ok {
+			embed.Title = fmt.Sprintf("Help for the %s command", command.Name)
+			embed.Description = fmt.Sprintf("%s\n\nFormat: %s %s %s\nExample: %s %s %s", command.Description,
+				model.Ping, command.Triggers[0], command.Format,
+				model.Ping, command.Triggers[0], command.Example)
+
+			_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			return
+		}
+	}
+
 	embed.Title = "Help"
 	embed.Description = "Repost Detector is a Discord bot which automatically detects and flags images which have been posted in the server before."
 	embed.Fields = []*discordgo.MessageEmbedField{
@@ -53,6 +66,15 @@ func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err err
 				model.Ping, commands[i].Triggers[0], commands[i].Example),
 		})
 	}
+
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	return
+}
+
+func badArguments(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+	embed := model.DefaultEmbed(m.Author)
+	embed.Title = "Bad/not enough arguments"
+	embed.Description = fmt.Sprintf("For more information on how to correctly use this command, type %s help %s", model.Ping, args[1])
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	return
