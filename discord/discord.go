@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"fmt"
 	"github.com/VolticFroogo/discord-repost-detector/model"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -11,10 +10,11 @@ var (
 	Discord *discordgo.Session
 )
 
-func Init() (err error) {
+func Init() {
+	var err error
 	Discord, err = discordgo.New("Bot " + model.DiscordToken)
 	if err != nil {
-		return fmt.Errorf("creating Discord client: %s", err)
+		panic(err)
 	}
 
 	Discord.AddHandler(messageCreate)
@@ -23,20 +23,17 @@ func Init() (err error) {
 
 	err = Discord.Open()
 	if err != nil {
-		return fmt.Errorf("connecting to Discord: %s", err)
+		panic(err)
 	}
 
 	log.Println("Connected to Discord.")
-
-	return
 }
 
-func Close() (err error) {
-	err = Discord.Close()
+func Close() {
+	err := Discord.Close()
 	if err != nil {
-		return fmt.Errorf("disconnecting: %s", err)
+		panic(err)
 	}
 
 	log.Println("Disconnected from Discord.")
-	return
 }

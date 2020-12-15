@@ -6,12 +6,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func hasAdministrator(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (admin bool, err error) {
+func hasAdministrator(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (admin bool) {
 	// NOTE: This seems to be very inefficient as it requires two additional API calls just to check the author's permissions.
 	// I couldn't find a better way to solve this using discordgo, so this will have to work for now.
 	guild, err := s.Guild(m.GuildID)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	if guild.OwnerID == m.Author.ID {
@@ -21,7 +21,7 @@ func hasAdministrator(s *discordgo.Session, m *discordgo.MessageCreate, args []s
 
 	member, err := s.GuildMember(m.GuildID, m.Author.ID)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	j := 0
@@ -38,15 +38,17 @@ func hasAdministrator(s *discordgo.Session, m *discordgo.MessageCreate, args []s
 		j++
 	}
 
-	err = badPermissions(s, m, args)
+	badPermissions(s, m, args)
 	return
 }
 
-func badPermissions(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func badPermissions(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Unauthorised"
 	embed.Description = fmt.Sprintf("You must have the Administrator permission to execute the %s command.", args[1])
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		panic(err)
+	}
 }

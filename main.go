@@ -5,24 +5,31 @@ import (
 	"github.com/VolticFroogo/discord-repost-detector/db"
 	"github.com/VolticFroogo/discord-repost-detector/discord"
 	"github.com/VolticFroogo/discord-repost-detector/status"
+	"github.com/getsentry/sentry-go"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
-	// Connect to MongoDB.
-	err := db.Init()
+	err := sentry.Init(sentry.ClientOptions{
+		ServerName: os.Getenv("SERVER_NAME"),
+		Debug:      true,
+	})
 	if err != nil {
-		log.Fatalf("Error initialising DB: %s", err)
+		log.Fatalf("Error initialising Sentry: %s", err)
 	}
+	// Flush buffered events before the program terminates.
+	defer sentry.Flush(10 * time.Second)
+	defer sentry.Recover()
+
+	// Connect to MongoDB.
+	db.Init()
 
 	// Connect to Discord.
-	err = discord.Init()
-	if err != nil {
-		log.Fatalf("Error initialising Discord: %s", err)
-	}
+	discord.Init()
 
 	// Start the status updater.
 	statusQuitChan, statusFinished := status.Start()
@@ -40,14 +47,8 @@ func main() {
 	<-statusFinished
 
 	// Disconnect from Discord.
-	err = discord.Close()
-	if err != nil {
-		log.Fatalf("Error closing Discord: %s", err)
-	}
+	discord.Close()
 
 	// Disconnect from MongoDB.
-	err = db.Close()
-	if err != nil {
-		log.Fatalf("Error closing DB: %s", err)
-	}
+	db.Close()
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	embed := model.DefaultEmbed(m.Author)
 
 	if len(args) > 2 {
@@ -14,7 +14,11 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err 
 			embed.Title = fmt.Sprintf("Help for the %s command", command.NameWithAdmin())
 			embed.Description = command.FormattedDescription()
 
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			if err != nil {
+				panic(err)
+			}
+
 			return
 		}
 	}
@@ -32,20 +36,24 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err 
 		},
 	}
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func unknownCommand(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
+func unknownCommand(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Unknown Command"
 	embed.Description = fmt.Sprintf("I didn't recognise that command; try %s help", model.Ping)
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err error) {
+func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Commands"
 	embed.Description = "A list of all available commands."
@@ -63,15 +71,19 @@ func list(s *discordgo.Session, m *discordgo.MessageCreate, _ []string) (err err
 		})
 	}
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func badArguments(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func badArguments(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	embed := model.DefaultEmbed(m.Author)
 	embed.Title = "Bad/not enough arguments"
 	embed.Description = fmt.Sprintf("For more information on how to correctly use this command, type %s help %s", model.Ping, args[1])
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		panic(err)
+	}
 }

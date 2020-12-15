@@ -13,7 +13,7 @@ type Command struct {
 	Format        string
 	Example       string
 	Triggers      []string
-	Exec          func(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error)
+	Exec          func(s *discordgo.Session, m *discordgo.MessageCreate, args []string)
 	RequiresAdmin bool
 }
 
@@ -85,26 +85,24 @@ func RegisterCommands() {
 	}
 }
 
-func Handle(s *discordgo.Session, m *discordgo.MessageCreate) (err error) {
+func Handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	args := strings.Split(strings.ToLower(m.Content), " ")
 
 	if len(args) == 1 {
-		err = help(s, m, args)
+		help(s, m, args)
 		return
 	}
 
 	if command, ok := triggerMap[args[1]]; ok {
 		if command.RequiresAdmin {
-			admin, err := hasAdministrator(s, m, args)
-			if err != nil || !admin {
-				return err
+			admin := hasAdministrator(s, m, args)
+			if !admin {
+				return
 			}
 		}
 
-		err = command.Exec(s, m, args)
+		command.Exec(s, m, args)
 	} else {
-		err = unknownCommand(s, m, args)
+		unknownCommand(s, m, args)
 	}
-
-	return
 }

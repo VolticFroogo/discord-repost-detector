@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/VolticFroogo/discord-repost-detector/db"
 	"github.com/VolticFroogo/discord-repost-detector/discord"
+	"github.com/getsentry/sentry-go"
 	"log"
 	"time"
 )
@@ -37,14 +38,15 @@ func thread(quit chan bool, finished chan bool) {
 }
 
 func updateStatus() {
+	defer sentry.Recover()
+
 	count, err := db.Images.EstimatedDocumentCount(db.DefaultContext())
 	if err != nil {
-		log.Printf("Error counting image documents: %s", err)
-		return
+		panic(err)
 	}
 
 	err = discord.Discord.UpdateStatus(0, fmt.Sprintf("@me - seen %d images", count))
 	if err != nil {
-		log.Printf("Error updating status: %s", err)
+		panic(err)
 	}
 }

@@ -15,40 +15,40 @@ type Channel struct {
 	Guild uint64 `bson:"guild"`
 }
 
-func channel(s *discordgo.Session, m *discordgo.MessageCreate, args []string) (err error) {
+func channel(s *discordgo.Session, m *discordgo.MessageCreate, args []string) {
 	if len(args) < 3 {
-		err = badArguments(s, m, args)
+		badArguments(s, m, args)
 		return
 	}
 
 	switch args[2] {
 	case "add":
-		err = addChannel(s, m)
+		addChannel(s, m)
 
 	case "remove":
-		err = removeChannel(s, m)
+		removeChannel(s, m)
 
 	default:
-		err = badArguments(s, m, args)
+		badArguments(s, m, args)
 	}
 
 	return
 }
 
-func addChannel(s *discordgo.Session, m *discordgo.MessageCreate) (err error) {
+func addChannel(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dgoChannel, err := s.Channel(m.ChannelID)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	channel, err := strconv.ParseUint(m.ChannelID, 0, 64)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	guild, err := strconv.ParseUint(m.GuildID, 0, 64)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	embed := model.DefaultEmbed(m.Author)
@@ -70,25 +70,27 @@ func addChannel(s *discordgo.Session, m *discordgo.MessageCreate) (err error) {
 	}
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	if err != nil {
+		panic(err)
+	}
 }
 
-func removeChannel(s *discordgo.Session, m *discordgo.MessageCreate) (err error) {
+func removeChannel(s *discordgo.Session, m *discordgo.MessageCreate) {
 	dgoChannel, err := s.Channel(m.ChannelID)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	channel, err := strconv.ParseUint(m.ChannelID, 0, 64)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	res, err := db.Channels.DeleteOne(db.DefaultContext(), bson.M{
 		"_id": channel,
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	embed := model.DefaultEmbed(m.Author)
@@ -102,5 +104,7 @@ func removeChannel(s *discordgo.Session, m *discordgo.MessageCreate) (err error)
 	}
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
-	return
+	if err != nil {
+		panic(err)
+	}
 }

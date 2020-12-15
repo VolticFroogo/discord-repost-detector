@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -21,23 +20,24 @@ var (
 	Channels *mongo.Collection
 )
 
-func Init() (err error) {
+func Init() {
 	opts := options.Client().ApplyURI(uri)
 
+	var err error
 	client, err = mongo.NewClient(opts)
 	if err != nil {
-		return fmt.Errorf("creating client with options: %s", err)
+		panic(err)
 	}
 
 	ctx := DefaultContext()
 	err = client.Connect(ctx)
 	if err != nil {
-		return fmt.Errorf("connecting to server: %s", err)
+		panic(err)
 	}
 
 	err = client.Ping(ctx, opts.ReadPreference)
 	if err != nil {
-		return fmt.Errorf("pinging server: %s", err)
+		panic(err)
 	}
 
 	db := client.Database(name)
@@ -47,18 +47,16 @@ func Init() (err error) {
 
 	log.Println("Connected to database.")
 
-	err = setupIndexes()
-	return
+	setupIndexes()
 }
 
-func Close() (err error) {
-	err = client.Disconnect(DefaultContext())
+func Close() {
+	err := client.Disconnect(DefaultContext())
 	if err != nil {
-		return fmt.Errorf("disconnecting: %s", err)
+		panic(err)
 	}
 
 	log.Println("Disconnected from database.")
-	return
 }
 
 func DefaultContext() (ctx context.Context) {

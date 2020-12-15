@@ -24,19 +24,17 @@ var indexes = []index{
 	},
 }
 
-func setupIndexes() (err error) {
+func setupIndexes() {
 	ctx := DefaultContext()
 
 	for i := range indexes {
 		indexName, err := (*indexes[i].Collection).Indexes().CreateOne(ctx, indexes[i].Model)
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		log.Printf("Created index %s in collection %s", indexName, (*indexes[i].Collection).Name())
 	}
 
 	log.Println("Setup/verified database indexes.")
-
-	return
 }

@@ -17,18 +17,20 @@ type Image struct {
 	User     uint64             `bson:"user"`
 }
 
-func (image Image) Insert() (err error) {
+func (image Image) Insert() {
 	now := time.Now()
 
 	image.ID = primitive.NewObjectIDFromTimestamp(now)
 	image.DateTime = primitive.NewDateTimeFromTime(now)
 
 	// Insert the document.
-	_, err = db.Images.InsertOne(db.DefaultContext(), image)
-	return
+	_, err := db.Images.InsertOne(db.DefaultContext(), image)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func (image Image) FindMatch() (matches []Image, err error) {
+func (image Image) FindMatch() (matches []Image) {
 	ctx := db.DefaultContext()
 
 	cursor, err := db.Images.Aggregate(ctx, []bson.M{
@@ -45,9 +47,13 @@ func (image Image) FindMatch() (matches []Image, err error) {
 		},
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	err = cursor.All(ctx, &matches)
+	if err != nil {
+		panic(err)
+	}
+
 	return
 }
